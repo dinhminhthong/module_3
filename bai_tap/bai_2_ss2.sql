@@ -1,5 +1,5 @@
-create database bai_tap_2;
-use bai_tap_2;
+create database if not exists quan_li_ban_hang;
+use quan_li_ban_hang;
 create table customer(
 c_id int primary key,
 c_name varchar(55),
