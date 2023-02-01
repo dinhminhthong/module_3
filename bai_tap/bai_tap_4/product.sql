@@ -58,7 +58,7 @@ call thong_tin_all_product();
 
 -- Tạo store procedure thêm một sản phẩm mới
 delimiter //
-create procedure add_product (`product_code` varchar(25), `product_name` varchar(25), `product_price`double, `product_amount` int, `product_description` varchar(25), `product_status` bit)
+create procedure add_product (in `product_code` varchar(25), `product_name` varchar(25), `product_price`double, `product_amount` int, `product_description` varchar(25), `product_status` bit)
 begin 
 insert into `products`.`product` (`product_code`, `product_name`, `product_price`, `product_amount`, `product_description`, `product_status`) 
 values (`product_code`, `product_name`, `product_price`, `product_amount`, `product_description`, `product_status`);
@@ -71,9 +71,10 @@ call thong_tin_all_product();
 
 -- Tạo store procedure sửa thông tin sản phẩm theo id
 delimiter //
-create procedure update_theo_id (id_edit int, `product_code_edit` varchar(25), `product_name_edit` varchar(25), `product_price_edit`double, `product_amount_edit` int, `product_description_edit` varchar(25), `product_status_edit` bit)
+create procedure  update_theo_id (in id_edit int, `product_code_edit` varchar(25), `product_name_edit` varchar(25), 
+`product_price_edit`double, `product_amount_edit` int, `product_description_edit` varchar(25), `product_status_edit` bit)
 begin
-update product set 
+update product p set 
     product_code = product_code_edit,
     product_name = product_name_edit,
     product_price= product_price_edit,
@@ -84,14 +85,14 @@ update product set
 end
 // delimiter ;
 
-call update_theo_id (2, "a6", "banh mi sua", 300, 1, "sua ong tho", 1);
+call update_theo_id ( 2, "a6", "banh mi sua", 300, 1, "sua ong tho", 1);
 call thong_tin_all_product();
 
 -- Tạo store procedure xoá sản phẩm theo id
 delimiter //
 create procedure delete_product (id_delete int)
 begin
-delete from product where product.id = id_delete;
+delete from product where p.id = id_delete;
 end
 // delimiter ;
 
