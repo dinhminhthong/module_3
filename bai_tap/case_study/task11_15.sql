@@ -10,27 +10,35 @@ where lk.ten_loai_khach like "Diamond"
   and (kh.dia_chi like "% Vinh" or kh.dia_chi like "% Quảng Ngãi");
   
   -- 12.	Hiển thị thông tin ma_hop_dong, ho_ten (nhân viên), ho_ten (khách hàng), so_dien_thoai (khách hàng), ten_dich_vu,
--- so_luong_dich_vu_di_kem (được tính dựa trên việc sum so_luong ở dich_vu_di_kem), tien_dat_coc của tất cả các dịch vụ đã từng
--- được khách hàng đặt vào 3 tháng cuối năm 2020 nhưng chưa từng được khách hàng đặt vào 6 tháng đầu năm 2021.
-select hop_dong.ma_hop_dong, nhan_vien.ho_ten as ho_ten_nhan_vien, khach_hang.ho_ten as ho_ten_khach_hang, khach_hang.so_dien_thoai, dich_vu.ten_dich_vu
-, hop_dong.tien_dat_coc
-from hop_dong
-left join nhan_vien on hop_dong.ma_nhan_vien = nhan_vien.ma_nhan_vien
-left join khach_hang on khach_hang.ma_khach_hang = hop_dong.ma_khach_hang 
-left join dich_vu on hop_dong.ma_dich_vu = dich_vu.ma_dich_vu
-left join hop_dong_chi_tiet on hop_dong_chi_tiet.ma_hop_dong = hop_dong.ma_hop_dong
--- của tất cả các dịch vụ đã từng được khách hàng đặt vào 3 tháng cuối năm 2020 
-where quarter(hop_dong.ngay_lam_hop_dong) = 4 and year(hop_dong.ngay_lam_hop_dong) = 2020
+-- so_luong_dich_vu_di_kem (được tính dựa trên việc sum so_luong ở dich_vu_di_kem),tien_dat_coc của tất cả các dịch vụ
+--  đã từng được khách hàng đặt vào 3 tháng cuối năm 2020 
 -- nhưng chưa từng được khách hàng đặt vào 6 tháng đầu năm 2021.
-and hop_dong.ngay_lam_hop_dong not in (
-select hop_dong.ngay_lam_hop_dong
-from hop_dong
-join dich_vu on dich_vu.ma_dich_vu = hop_dong.ma_dich_vu
 
-where quarter(hop_dong.ngay_lam_hop_dong) in (1,2) and year(hop_dong.ngay_lam_hop_dong) = "2021" 
-)
-group by hop_dong.ma_hop_dong
-;
+select* from hop_dong;
+
+select hd.ma_hop_dong,
+       nv.ho_ten        as ten_nhan_vien,
+       kh.ho_ten        as ten_khach_hang,
+       kh.so_dien_thoai as so_dien_thoai_khach_hang,
+       dv.ten_dich_vu,
+       sum(hdct.so_luong),
+       hd.tien_dat_coc,
+       hd.ngay_lam_hop_dong
+from hop_dong hd
+         join nhan_vien nv on hd.ma_nhan_vien = nv.ma_nhan_vien
+         join khach_hang kh on kh.ma_khach_hang = hd.ma_khach_hang
+         join dich_vu dv on dv.ma_dich_vu = hd.ma_dich_vu
+         left join hop_dong_chi_tiet hdct on hdct.ma_hop_dong = hd.ma_hop_dong
+where hd.ma_hop_dong not in (select hd.ma_hop_dong
+                             from hop_dong hd
+                             where quarter(ngay_lam_hop_dong) in (1, 2)
+								   and year (ngay_lam_hop_dong) =2021)
+  and hd.ma_hop_dong in (
+select hd.ma_hop_dong
+from hop_dong hd
+where quarter(hd.ngay_lam_hop_dong) = 4
+  and year (ngay_lam_hop_dong) =2020)
+group by hd.ma_hop_dong;
 
 -- 13.	Hiển thị thông tin các Dịch vụ đi kèm được sử dụng nhiều nhất bởi các Khách hàng đã đặt phòng.
 -- (Lưu ý là có thể có nhiều dịch vụ có số lần sử dụng nhiều như nhau).
@@ -73,10 +81,8 @@ from nhan_vien nv
          join trinh_do td on td.ma_trinh_do = nv.ma_trinh_do
          join hop_dong hd on hd.ma_nhan_vien = nv.ma_nhan_vien
 where nv.ma_nhan_vien in (select hd.ma_nhan_vien
-                          from hop_dong hd
-                          where year (
-    ngay_lam_hop_dong) = 2020
-   or year (ngay_lam_hop_dong) = 2021
-    )
+		from hop_dong hd
+		where year (ngay_lam_hop_dong) = 2020
+   or year (ngay_lam_hop_dong) = 2021)
 group by nv.ma_nhan_vien
 having count(hd.ma_hop_dong) <=3;
