@@ -16,7 +16,7 @@ public class ProductServlet extends HttpServlet {
         request.setAttribute("sum", sum);
         request.setAttribute("productDescription",productDescription);
             //b2:tìm kết quả
-        request.getRequestDispatcher("/index.jsp").forward(request,response);
+        request.getRequestDispatcher("/ketqua.jsp").forward(request,response);
     }
 
     @Override
